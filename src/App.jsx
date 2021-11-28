@@ -3,11 +3,15 @@ import { ethers } from "ethers";
 import './App.css';
 import useCheckWallet from "./hooks/checkWallet.jsx";
 import Story from './Story.jsx';
+import ConnectWallet from "./ConnectWallet";
+import ViewStory from "./ViewStory";
+import useJokes from './hooks/getJokes.jsx';
 
 export default function App() {
 
   const [currentAccount, connectWallet] = useCheckWallet();
-
+  const { ethereum } = window;
+  const stories = useJokes(currentAccount);
 
   return (
 
@@ -23,73 +27,35 @@ export default function App() {
             <h3 className="pt-4 text-2xl text-center">
               👋 Hey there!
               </h3>
-            <div className="bio text-center">
-              Let's create a story. Once upon a time...
-            </div>
-           
-            {currentAccount && ethereum && <Story />}
-
-            {!ethereum &&
-              <p>Please download or connect with Metamask in order to login</p>
-            }
-
-            {!currentAccount && ethereum && (
-              <div className="px-8 pt-6 pb-12 mb-4 bg-white rounded">
-                <div className="mb-6 text-center">
-                  <button
-                    onClick={connectWallet}
-                    className="w-full px-4 py-2 font-bold text-white bg-yellow-500 rounded-full hover:bg-yellow-700 focus:outline-none focus:shadow-outline"
-                    type="button"
-                  >
-                    Connect your wallet
-								</button>
-                </div>
-              </div>
-            )}
             {
-              currentAccount && <div className="welcome">Welcome {currentAccount} </div>
+              currentAccount && <h2 className="welcome text-center">Welcome {currentAccount} </h2>
             }
+            <div className="bio text-center">
+              {ethereum ?
+                <span> "Let's create a story. Once upon a time..."</span>
+                : <span>Please download or connect with Metamask in order to login</span>
+              }
+            </div>
+
+
+            {/* show story component only if a wallet is connected*/}
+            {currentAccount && <Story />}
+
+
+            <ConnectWallet currentAccount={currentAccount}
+              connectWallet={connectWallet} />
+
+
 
           </div>
         </div>
+
+      </div>
+      <div>
+        <hr className="mb-6 border-t" />
+        <ViewStory stories={stories} />
       </div>
     </div>
   )
 
-  return (
-    <div className="mainContainer">
-
-      <div className="dataContainer">
-        <div className="header">
-          👋 Hey there!
-        </div>
-
-        <div className="bio">
-          Let's create a story. Once upon a time...
-        </div>
-
-        <Story />
-
-        {!ethereum &&
-          <p>Please download or connect with Metamask in order to login</p>
-        }
-
-        {!currentAccount && ethereum && (
-          <div className="mb-6 text-center">
-            <button
-              onClick={connectWallet}
-              className="w-full px-4 py-2 font-bold text-white bg-yellow-500 rounded-full hover:bg-yellow-700 focus:outline-none focus:shadow-outline"
-              type="button"
-            >
-              Connect your wallet
-								</button>
-          </div>
-
-        )}
-        {
-          currentAccount && <div className="welcome">Welcome {currentAccount} </div>
-        }
-      </div>
-    </div>
-  );
 }

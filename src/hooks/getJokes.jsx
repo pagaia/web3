@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import jokePortal from "../data/JokePortal.json";
+import { contractAddress } from "../data/constants";
 
-const useJokes = (check) => {
+const useJokes = (account) => {
 
   const contractABI = jokePortal.abi;
-  const contractAddress = '0x7dEef0505Cd56a7205Cdc80711dDD889f461C76d';
 
-  const [joke, setJoke] = useState({})
+  const [stories, setStories] = useState([])
 
+  console.log({ account })
   useEffect(() => {
 
     const getJoke = async () => {
@@ -23,22 +24,9 @@ const useJokes = (check) => {
           let count = await jokePortalContract.getTotalJokes();
           console.log("Retrieved total jokes count...", count.toNumber());
 
-          const lastJoke = await jokePortalContract.getLastJoke();
+          const story = await jokePortalContract.getStory();
 
-          setJoke({ count, lastJoke })
-          /*
-          * Execute the actual wave from your smart contract
-          */
-          /* const jokeTxn = await jokePortalContract.tellAJoke(joke);
-           console.log("Mining...", jokeTxn.hash);
-   
-           await jokeTxn.wait();
-           console.log("Mined -- ", jokeTxn.hash);
-   
-           count = await jokePortalContract.getTotalJokes();
-           console.log("Retrieved total jokes count...", count.toNumber());
-   */
-
+          setStories(story);
         } else {
           console.log("Ethereum object doesn't exist!");
         }
@@ -48,9 +36,43 @@ const useJokes = (check) => {
     }
 
     getJoke();
-  }, [check])
+  }, [account])
 
-  return joke
+
+  /**
+   * Listen in for emitter events!
+   */
+  useEffect(() => {
+    let jokeContract;
+
+    const onNewJoke = (from, timestamp, message) => {
+      console.log('NewJoke', from, timestamp, message);
+      setStories(prevState => [
+        ...prevState,
+        {
+          teller: from,
+          timestamp: new Date(timestamp * 1000),
+          message,
+        },
+      ]);
+    };
+
+    if (window.ethereum) {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+
+      jokeContract = new ethers.Contract(contractAddress, contractABI, signer);
+      jokeContract.on('NewJoke', onNewJoke);
+    }
+
+    return () => {
+      if (jokeContract) {
+        jokeContract.off('NewJoke', onNewJoke);
+      }
+    };
+  }, []);
+
+  return stories;
 
 }
 
