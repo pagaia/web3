@@ -15,8 +15,8 @@ const ViewStory = ({ stories }) => {
             <div>Story number {index + 1}: </div>
             <div>message: {story.message}</div>
             <div>story teller: {story.teller}</div>
-            <div>Told on :
-            <time datetime={timeStamp}>{dateTime}</time>
+            <div>Told on:
+            <time dateTime={timeStamp}>{dateTime}</time>
             </div>
 
           </div>

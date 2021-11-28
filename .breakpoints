@@ -1,3 +1,12 @@
 {
-  "files": {}
+  "files": {
+    "src/ViewStory.jsx": [
+      {
+        "id": "80f7eda4-ee4d-422f-8e41-77b6e4c5928b",
+        "line": 10,
+        "version": 495,
+        "index": 182
+      }
+    ]
+  }
 }
